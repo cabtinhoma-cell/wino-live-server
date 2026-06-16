@@ -1,4 +1,5 @@
-const pool = require('./config/database');
+const mysql = require('mysql2/promise');
+const config = require('./config');
 
 const schema = `
 CREATE TABLE IF NOT EXISTS networks (
@@ -16,8 +17,7 @@ CREATE TABLE IF NOT EXISTS rooms (
   img_url VARCHAR(500) DEFAULT NULL,
   user_count INT DEFAULT 0,
   is_locked TINYINT DEFAULT 0,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (network_id) REFERENCES networks(id) ON DELETE SET NULL
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -65,8 +65,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   talk_time INT DEFAULT 0,
   likes INT DEFAULT 0,
   expire_days INT DEFAULT 0,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS fcm_tokens (
@@ -75,8 +74,7 @@ CREATE TABLE IF NOT EXISTS fcm_tokens (
   token TEXT NOT NULL,
   device_id VARCHAR(255) DEFAULT NULL,
   updated_at BIGINT DEFAULT NULL,
-  UNIQUE KEY unique_token (user_aid, token(255)),
-  FOREIGN KEY (user_aid) REFERENCES users(aid) ON DELETE CASCADE
+  UNIQUE KEY unique_token (user_aid, token(255))
 );
 
 CREATE TABLE IF NOT EXISTS transactions (
@@ -84,8 +82,7 @@ CREATE TABLE IF NOT EXISTS transactions (
   user_aid VARCHAR(50) NOT NULL,
   type VARCHAR(50) DEFAULT NULL,
   amount INT DEFAULT 0,
-  created_at BIGINT DEFAULT NULL,
-  FOREIGN KEY (user_aid) REFERENCES users(aid) ON DELETE CASCADE
+  created_at BIGINT DEFAULT NULL
 );
 `;
 
@@ -123,6 +120,23 @@ INSERT IGNORE INTO rooms (id, name, title, network_id, user_count) VALUES
 async function initDB() {
   try {
     console.log('🔧 Initializing database...');
+
+    const dbName = config.db.database;
+
+    const tempPool = mysql.createPool({
+      host: config.db.host,
+      port: config.db.port,
+      user: config.db.user,
+      password: config.db.password,
+      ssl: config.db.ssl || false
+    });
+
+    await tempPool.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);
+    console.log(`✅ Database "${dbName}" ready`);
+    await tempPool.end();
+
+    const pool = require('./config/database');
+
     const statements = schema.split(';').filter(s => s.trim());
     for (const stmt of statements) {
       await pool.query(stmt);
@@ -138,6 +152,7 @@ async function initDB() {
     console.log('🎉 Database initialized successfully');
   } catch (err) {
     console.error('❌ Database init error:', err.message);
+    console.error(err);
   }
 }
 
