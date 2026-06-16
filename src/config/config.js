@@ -1,0 +1,34 @@
+require('dotenv').config();
+
+module.exports = {
+  port: parseInt(process.env.PORT) || 3000,
+  apiPort: parseInt(process.env.PORT) || 3000,
+  wssPort: parseInt(process.env.WSS_PORT) || 3002,
+  signalingPort: parseInt(process.env.SIGNALING_PORT) || 5051,
+  host: process.env.HOST || '0.0.0.0',
+  baseUrl: process.env.BASE_URL || 'http://192.168.1.37',
+  mediaPort: parseInt(process.env.MEDIA_PORT) || 8890,
+
+  db: {
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT) || 3306,
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'wino_live',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+  },
+
+  jwt: {
+    secret: process.env.JWT_SECRET || 'wino-secret',
+    refreshSecret: process.env.JWT_REFRESH_SECRET || 'wino-refresh-secret',
+    expiresIn: process.env.JWT_EXPIRES_IN || '24h',
+    refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d'
+  },
+
+  media: {
+    url: process.env.MEDIA_URL || 'http://192.168.1.37:8890',
+    secret: process.env.MEDIA_SECRET || 'media-secret'
+  }
+};
