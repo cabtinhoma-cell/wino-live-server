@@ -3,27 +3,40 @@ services:
     name: wino-live-server
     runtime: node
     plan: free
+    repo: https://github.com/cabtinhoma-cell/wino-live-server
     buildCommand: npm install
     startCommand: node src/index.js
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 3000
-      - key: BASE_URL
-        sync: false
+        value: 10000
       - key: DB_HOST
-        sync: false
+        fromDatabase:
+          name: wino-db
+          property: host
       - key: DB_PORT
-        value: 3306
+        fromDatabase:
+          name: wino-db
+          property: port
       - key: DB_USER
-        sync: false
+        fromDatabase:
+          name: wino-db
+          property: user
       - key: DB_PASSWORD
-        sync: false
+        fromDatabase:
+          name: wino-db
+          property: password
       - key: DB_NAME
-        sync: false
+        fromDatabase:
+          name: wino-db
+          property: database
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_REFRESH_SECRET
         generateValue: true
-    healthCheckPath: /health
+
+databases:
+  - name: wino-db
+    plan: free
+    databaseName: wino_live
