@@ -12,6 +12,7 @@ const cors = require('cors');
 const config = require('./config/config');
 const { setupSocket } = require('./socket/index');
 const { setupSignaling } = require('./webrtc/index');
+const initDB = require('./init-db');
 const HOST = process.env.HOST || '0.0.0.0';
 
 const authRoutes = require('./routes/auth');
@@ -54,10 +55,16 @@ const io = setupSocket(server);
 setupSignaling();
 
 const PORT = config.apiPort;
-server.listen(PORT, () => {
-  console.log(`🚀 Wino Live Server running on port ${PORT}`);
-  console.log(`   API:       http://0.0.0.0:${PORT}/api/v1/`);
-  console.log(`   Socket.IO: http://0.0.0.0:${PORT}/socket.io/`);
-  console.log(`   Media:     http://0.0.0.0:${PORT}/image/`);
-  console.log(`   Signaling: tcp://0.0.0.0:${config.signalingPort}`);
-});
+
+async function start() {
+  await initDB();
+  server.listen(PORT, () => {
+    console.log(`🚀 Wino Live Server running on port ${PORT}`);
+    console.log(`   API:       http://0.0.0.0:${PORT}/api/v1/`);
+    console.log(`   Socket.IO: http://0.0.0.0:${PORT}/socket.io/`);
+    console.log(`   Media:     http://0.0.0.0:${PORT}/image/`);
+    console.log(`   Signaling: tcp://0.0.0.0:${config.signalingPort}`);
+  });
+}
+
+start();
